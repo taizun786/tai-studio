@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>T.A.I. Story Library</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="T.A.I. Stories">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#0B0C0E">
+<style>
+  :root{
+    --black:#0B0C0E;
+    --panel:rgba(255,255,255,.022);
+    --rule:#262B32;
+    --rule-soft:rgba(38,43,50,.6);
+    --chalk:#EDEBE6;
+    --graphite:#7C848F;
+    --green:#4FB477;
+    --red:#D9604F;
+    --amber:#F0A22E;
+    --accent:#EDEBE6;
+    --disp:"Arial Narrow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--black);}
+  body{color:var(--chalk);font-family:var(--body);font-size:15px;line-height:1.45;
+    padding:env(safe-area-inset-top) 0 calc(90px + env(safe-area-inset-bottom));
+    -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;}
+  .wrap{max-width:620px;margin:0 auto;padding:0 15px;}
+
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--graphite);}
+  h1{font-family:var(--disp);font-size:clamp(31px,10vw,46px);font-weight:700;
+    letter-spacing:.045em;text-transform:uppercase;margin:3px 0 7px;line-height:.94;}
+  header{padding:20px 0 13px;border-bottom:1px solid var(--rule);margin-bottom:16px;}
+  .shopline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite);}
+  .shopline b{color:var(--chalk);font-weight:600;}
+  .status{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:right;color:var(--graphite);}
+  .k-ok{color:var(--green)} .k-warn{color:var(--amber)} .k-bad{color:var(--red)} .k-dim{color:var(--graphite)}
+  .sizebar{margin-top:10px;border:1px solid var(--rule);border-radius:12px;padding:9px 12px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;line-height:1.5;}
+  .sizebar.k-warn{border-color:var(--amber)} .sizebar.k-bad{border-color:var(--red)}
+  #fatal{display:none;border:1px solid var(--red);border-radius:12px;padding:12px;margin-bottom:14px;
+    font-family:var(--mono);font-size:11px;color:var(--red);white-space:pre-wrap;}
+
+  .btn{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--rule);color:var(--graphite);
+    padding:0 15px;min-height:40px;border-radius:999px;cursor:pointer;white-space:nowrap;
+    transition:color .15s,border-color .15s;}
+  .btn:hover{color:var(--chalk);border-color:var(--graphite);}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .btn.on{border-color:var(--accent);color:var(--accent);}
+  .btn.ghost{border-style:dashed;}
+  .btn.danger:hover{color:var(--red);border-color:var(--red);}
+  .btn.armed{color:var(--red);border-color:var(--red);}
+  .icb{background:transparent;border:1px solid var(--rule);color:var(--graphite);
+    width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:12px;line-height:1;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;padding:0;}
+  .icb:hover{color:var(--chalk);border-color:var(--graphite);}
+  .icb:disabled{opacity:.28;}
+  .tools{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;}
+
+  /* List cards */
+  .card{display:flex;gap:14px;align-items:stretch;width:100%;text-align:left;
+    background:var(--panel);border:1px solid var(--rule);border-left:2px solid var(--accent);
+    border-radius:16px;padding:15px 15px 16px;margin-bottom:11px;cursor:pointer;
+    color:var(--chalk);transition:background .15s;}
+  .card:hover{background:rgba(255,255,255,.045);}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .card.complete{border-left-color:var(--green);}
+  .rank{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--accent);flex:0 0 auto;padding-top:3px;width:20px;}
+  .card.complete .rank{color:var(--green);}
+  .cardbody{flex:1;min-width:0;display:block;}
+  .cardname{font-family:var(--disp);font-size:23px;font-weight:700;letter-spacing:.035em;
+    text-transform:uppercase;line-height:1.03;margin:1px 0 11px;overflow-wrap:anywhere;}
+  .cardfoot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:9px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite);}
+  .cardfoot .n{color:var(--accent);}
+  .card.complete .cardfoot .n{color:var(--green);}
+  .chev{color:var(--graphite);font-size:15px;align-self:center;flex:0 0 auto;}
+
+  .tally{display:flex;gap:2px;height:15px;align-items:stretch;}
+  .tally.tall{height:22px;}
+  .tally span{flex:1 1 0;min-width:2px;border:1px solid var(--rule);border-radius:4px;transition:background .2s,border-color .2s;}
+  .tally span.done{background:var(--accent);border-color:var(--accent);}
+  .tally.win span.done{background:var(--green);border-color:var(--green);}
+
+  .rrow{display:flex;gap:7px;align-items:center;width:100%;padding:10px 0;border-bottom:1px solid var(--rule-soft);}
+  .rrow .rname{flex:1;min-width:0;font-family:var(--disp);font-size:18px;font-weight:700;letter-spacing:.035em;
+    text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rrow .dotc{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);flex:0 0 auto;}
+
+  /* Detail */
+  .backrow{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+  .back{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    background:transparent;border:none;border-bottom:1px solid var(--rule);color:var(--graphite);padding:8px 1px 4px;cursor:pointer;}
+  .back:hover{color:var(--accent);border-color:var(--accent);}
+  .jobhead{border:1px solid var(--rule);border-top:2px solid var(--accent);border-radius:16px;padding:16px 15px 17px;margin-bottom:20px;}
+  .jobhead.complete{border-top-color:var(--green);}
+  .readout{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite);}
+  .readout .pct{font-size:22px;color:var(--accent);letter-spacing:.02em;}
+  .jobhead.complete .readout .pct{color:var(--green);}
+  .tallywrap{margin:15px 0 0;}
+  .colorrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:15px;padding-top:13px;border-top:1px solid var(--rule-soft);}
+  .colorrow .eyebrow{margin-right:4px;}
+  .pdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--rule);background:var(--c);cursor:pointer;padding:0;}
+  .pdot.on{border-color:var(--chalk);}
+  .swatch{position:relative;width:30px;height:30px;flex:0 0 auto;border-radius:10px;border:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .swatch i{display:block;width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);}
+  .swatch input{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:none;padding:0;cursor:pointer;}
+
+  .phase{margin-bottom:22px;}
+  .phasehead{display:flex;align-items:center;gap:9px;padding:0 0 7px;border-bottom:1px solid var(--rule);margin-bottom:2px;}
+  .phasehead h2{font-family:var(--disp);font-size:16px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin:0;flex:1;min-width:0;}
+  .phasehead .tick{font-family:var(--mono);font-size:10px;color:var(--graphite);letter-spacing:.08em;}
+  .phasehead .tick.win{color:var(--green);}
+  .phasenote{font-size:13px;color:var(--graphite);margin:9px 0 0;line-height:1.5;}
+
+  .step{display:flex;align-items:center;gap:11px;padding:13px 3px;border-bottom:1px solid var(--rule-soft);cursor:pointer;}
+  .step:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+  .box{flex:0 0 auto;width:20px;height:20px;border:1.5px solid var(--rule);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:transparent;transition:all .15s;}
+  .step.done .box{border-color:var(--accent);color:var(--accent);}
+  .idx{font-family:var(--mono);font-size:10px;color:var(--graphite);flex:0 0 auto;width:16px;}
+  .steptitle{font-size:15px;font-weight:600;line-height:1.35;flex:1;min-width:0;}
+  .step.done .steptitle{color:var(--graphite);text-decoration:line-through;text-decoration-color:var(--rule);}
+
+  .oweblock{padding:14px 0 4px;border-bottom:1px solid var(--rule-soft);}
+  .oweblock:last-child{border-bottom:0;}
+  .oweblock h3{font-family:var(--disp);font-size:19px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:0 0 6px;color:var(--accent);}
+  .prompts{list-style:none;margin:0 0 10px;padding:0;}
+  .prompts li{position:relative;padding-left:16px;margin:4px 0;font-size:13.5px;color:var(--graphite);line-height:1.45;}
+  .prompts li::before{content:"›";position:absolute;left:3px;color:var(--accent);font-family:var(--mono);}
+
+  .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--graphite);margin:14px 0 6px;}
+  .f{display:block;width:100%;background:transparent;border:1px solid var(--rule);border-radius:14px;color:var(--chalk);
+    font-family:var(--body);font-size:16px;line-height:1.45;padding:11px 14px;margin:0 0 4px;outline:none;
+    -webkit-appearance:none;appearance:none;}
+  .f:focus{border-color:var(--accent);}
+  .f::placeholder{color:var(--graphite);}
+  textarea.f{min-height:92px;resize:none;overflow:hidden;}
+  textarea.f.fixed{min-height:170px;overflow:auto;resize:vertical;font-family:var(--mono);font-size:12.5px;line-height:1.5;}
+  select.f{background-image:none;}
+  input.f[type=date]{min-height:46px;}
+  .title-in{font-family:var(--disp);font-size:29px;font-weight:700;letter-spacing:.035em;text-transform:uppercase;line-height:1.05;
+    border:none;border-bottom:1px solid var(--rule);border-radius:0;padding:4px 0 8px;margin:3px 0 0;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .hint{display:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;line-height:1.5;color:var(--amber);margin:2px 0 8px;}
+  .hint.show{display:block;}
+
+  .sync{border:1px solid var(--rule);border-radius:16px;padding:15px;margin-bottom:18px;}
+  .sync h3{font-family:var(--disp);font-size:17px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:0 0 4px;}
+  .sync p{font-size:13px;color:var(--graphite);margin:0 0 11px;line-height:1.5;}
+  .syncmsg{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;line-height:1.5;margin-top:10px;overflow-wrap:anywhere;}
+  .empty{color:var(--graphite);font-size:13.5px;padding:14px 0;}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+
+  footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--rule);
+    font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--graphite);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;}
+  @media (max-width:360px){ .g2{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">T.A.I. · A Storytelling Studio</div>
+    <h1>Story Library</h1>
+    <div class="shopline">
+      <span id="globalLine">Loading stories…</span>
+      <span id="saveStatus" class="status">·</span>
+    </div>
+    <div id="sizebar" class="sizebar" hidden></div>
+  </header>
+  <div id="fatal"></div>
+  <div id="view"></div>
+  <footer>
+    <span>Story Library · template v<span id="verNum">1</span></span>
+    <span style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="refreshBtn">Refresh</button>
+      <button class="btn" id="exportBtn">Export</button>
+      <button class="btn" id="importBtn">Import</button>
+      <button class="btn" id="cfgBtn">Sync setup</button>
+    </span>
+  </footer>
+</div>
+
+<datalist id="fpsList"><option value="8"><option value="12"><option value="15"><option value="24"><option value="25"><option value="30"></datalist>
+
+<script>
+'use strict';
+/* =====================================================================
+   T.A.I. STORY LIBRARY — single file, no build step, no libraries.
+
+   ORDER OF THIS SCRIPT MATTERS:
+     1. constants   2. state variables   3. functions   4. boot (last line)
+   Every top-level let/const lives in sections 1 and 2, above the first
+   render() call, so a temporal-dead-zone error cannot blank the app.
+   Never use prompt() / confirm() / navigator.clipboard anywhere below.
+   ===================================================================== */
+
+/* ---------- 1. CONSTANTS ---------- */
+const KEY_DATA = 'taiStories.data.v1';
+const KEY_SYNC = 'taiStories.sync.v1';
+const API = 'https://api.jsonbin.io/v3/b';
+const PULL_THROTTLE_MS = 8000;
+const PUSH_DEBOUNCE_MS = 800;
+const LOCAL_DEBOUNCE_MS = 300;
+const WARN_BYTES = 60 * 1024;
+const DANGER_BYTES = 85 * 1024;      /* JSONBin free bins are small (~100 KB) */
+const LONG_FIELD_CHARS = 3000;
+const TEMPLATE_VERSION = 1;
+
+const PALETTE = ['#58BFD1','#E8551A','#9B87E0','#4FB477','#F0A22E','#D9604F'];
+
+/* Stable ids: saved data is keyed by these, so the template can be
+   re-labelled, re-ordered or extended later without touching saved writing. */
+const STAGES = [
+  { id:'idea',    label:'Idea' },
+  { id:'owe',     label:'Object-World-Emotion' },
+  { id:'script',  label:'Script and beats' },
+  { id:'board',   label:'Storyboard and previz' },
+  { id:'build',   label:'Build' },
+  { id:'shoot',   label:'Shoot' },
+  { id:'score',   label:'Score' },
+  { id:'edit',    label:'Edit' },
+  { id:'archive', label:'Post-mortem and archive' }
+];
+
+const OWE = [
+  { id:'object',  label:'Object',  prompts:[
+    'What single physical thing does this story turn on?',
+    'What is it made of, how old is it, how worn? Could you build it for real?',
+    'What does it want, hide or remember? What is different about it at the end?' ] },
+  { id:'world',   label:'World',   prompts:[
+    'Where and when does this live, and what are its rules?',
+    'What do the light, weather and sound do here?',
+    'What is missing from this world that the story is really about?' ] },
+  { id:'emotion', label:'Emotion', prompts:[
+    'What one feeling should someone leave with?',
+    'Where does it first show up, and where does it land?',
+    'What opposite feeling does it push against? How does the score carry it?' ] }
+];
+
+const PM = [
+  { id:'worked',   q:'What worked?' },
+  { id:'change',   q:'What would you change next time?' },
+  { id:'owe',      q:'Did the Object, World and Emotion land? Where did they get lost?' },
+  { id:'time',     q:'Time and cost: planned vs actual?' },
+  { id:'learned',  q:'What did you learn (materials, rig, camera, software)?' },
+  { id:'response', q:'How did people respond? (views, comments, saves, who reacted)' },
+  { id:'forward',  q:'What carries forward to the next story?' }
+];
+
+const POST_STATUS = ['Not started','In progress','In review','Ready to publish','Published'];
+
+/* text-format key  ->  stored key */
+const LOG_KEYS = [
+  { t:'shoot_dates',  k:'shootDates' },
+  { t:'runtime',      k:'runtime' },
+  { t:'fps',          k:'fps' },
+  { t:'music',        k:'music' },
+  { t:'script_link',  k:'scriptLink' },
+  { t:'post_status',  k:'postStatus' },
+  { t:'publish_date', k:'publishDate' }
+];
+
+/* ---------- 2. STATE VARIABLES (all declared before first render) ---------- */
+let currentId = null;
+let panel = '';              /* '' | 'sync' | 'io' */
+let reorderMode = false;
+let draftBin = '';
+let draftKey = '';
+let draftImport = '';
+let exportText = '';
+let syncMsg = '';
+let syncMsgKind = 'dim';
+let ioMsg = '';
+let ioMsgKind = 'dim';
+let netState = 'idle';       /* idle | syncing | error */
+let netMsg = '';
+let syncedStamp = '';
+let lastSyncAt = 0;
+let lastPullAt = 0;
+let pulling = false;
+let pushing = false;
+let pushAgain = false;
+let pulledOnce = false;
+let deferred = null;         /* remote data waiting while I type */
+let localOK = true;
+let bootEmpty = false;
+let tLocal = 0;
+let tPush = 0;
+let focusTitle = false;
+let selectExportNext = false;
+let data = loadLocal();
+let sync = loadSync();
+const app = document.getElementById('view');
+const elStatus = document.getElementById('saveStatus');
+const elGlobal = document.getElementById('globalLine');
+const elSize = document.getElementById('sizebar');
+const elFatal = document.getElementById('fatal');
+
+/* ---------- 3. FUNCTIONS ---------- */
+
+/* ----- small helpers ----- */
+function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function nowISO(){ return new Date().toISOString(); }
+function newId(){ return 's_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function str(v){ return typeof v === 'string' ? v : ''; }
+function plain(v){ return (v && typeof v === 'object' && !Array.isArray(v)) ? Object.assign({}, v) : {}; }
+function isHex(v){ return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function norm(x){ return String(x).toLowerCase().replace(/[^a-z0-9]/g,''); }
+function hhmm(ms){ const d = new Date(ms); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function syncReady(){ return !!(sync.binId && sync.key); }
+function cur(){ return currentId ? data.stories.find(function(s){ return s.id === currentId; }) : null; }
+
+/* ----- data shape ----- */
+function blankData(){ return { schema:1, updated:'', stories:[] }; }
+
+function normStory(s){
+  const o = Object.assign({}, s);                 /* keep unknown keys */
+  o.id = (typeof s.id === 'string' && s.id) ? s.id : newId();
+  o.title = str(s.title);
+  o.accent = isHex(s.accent) ? s.accent : PALETTE[0];
+  o.created = str(s.created);
+  o.notes = str(s.notes);
+  o.stages = plain(s.stages);
+  o.owe = plain(s.owe);
+  o.pm = plain(s.pm);
+  o.log = Object.assign({ shootDates:'', runtime:'', fps:'', music:'', scriptLink:'',
+                          postStatus:POST_STATUS[0], publishDate:'' }, plain(s.log));
+  return o;
+}
+
+function normalizeData(d){
+  const out = blankData();
+  if(!d || typeof d !== 'object') return out;
+  out.updated = str(d.updated);
+  if(Array.isArray(d.stories)){
+    d.stories.forEach(function(s){ if(s && typeof s === 'object') out.stories.push(normStory(s)); });
+  }
+  return out;
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(KEY_DATA);
+    if(!raw) return blankData();
+    try{ return normalizeData(JSON.parse(raw)); }
+    catch(e){ try{ localStorage.setItem(KEY_DATA + '.corrupt', raw); }catch(_){} return blankData(); }
+  }catch(e){ return blankData(); }
+}
+function loadSync(){
+  try{
+    const j = JSON.parse(localStorage.getItem(KEY_SYNC) || 'null');
+    if(j && typeof j.binId === 'string' && typeof j.key === 'string') return { binId:j.binId.trim(), key:j.key.trim() };
+  }catch(e){}
+  return { binId:'', key:'' };
+}
+function saveSyncCfg(){ try{ localStorage.setItem(KEY_SYNC, JSON.stringify(sync)); }catch(e){} }
+function saveLocal(){
+  clearTimeout(tLocal);
+  try{ localStorage.setItem(KEY_DATA, JSON.stringify(data)); localOK = true; }
+  catch(e){ localOK = false; }
+}
+
+function doneCount(s){ return STAGES.filter(function(x){ return s.stages[x.id]; }).length; }
+function curStage(s){ const st = STAGES.find(function(x){ return !s.stages[x.id]; }); return st ? st.label : 'Complete'; }
+
+/* ----- change tracking: every edit goes through touch() ----- */
+function touch(){
+  data.updated = nowISO();
+  clearTimeout(tLocal); tLocal = setTimeout(saveLocal, LOCAL_DEBOUNCE_MS);
+  schedPush();
+  refreshStatus();
+}
+function schedPush(ms){
+  clearTimeout(tPush);
+  tPush = setTimeout(push, ms == null ? PUSH_DEBOUNCE_MS : ms);
+}
+
+/* ----- status line + size warnings ----- */
+function sizeBytes(){
+  const j = JSON.stringify(data);
+  try{ return new Blob([j]).size; }catch(e){ return j.length; }
+}
+function refreshStatus(){
+  const b = sizeBytes();
+  const kb = (b / 1024).toFixed(1) + ' KB';
+  let msg, kind;
+  if(!syncReady()){ msg = 'Local only · no sync key'; kind = 'warn'; }
+  else if(netState === 'syncing'){ msg = 'Syncing…'; kind = 'dim'; }
+  else if(netState === 'error'){ msg = netMsg + ' · saved on this device'; kind = 'bad'; }
+  else if(deferred){ msg = 'Remote update waiting · finish typing'; kind = 'warn'; }
+  else if(data.updated !== syncedStamp){ msg = 'Saved on this device · not yet synced'; kind = 'warn'; }
+  else { msg = 'Synced' + (lastSyncAt ? ' ' + hhmm(lastSyncAt) : ''); kind = 'ok'; }
+  if(!localOK) msg += ' · browser storage blocked';
+  elStatus.textContent = msg + ' · ' + kb;
+  elStatus.className = 'status k-' + kind;
+
+  if(b >= DANGER_BYTES){
+    elSize.hidden = false; elSize.className = 'sizebar k-bad';
+    elSize.textContent = 'Library is ' + kb + ' — close to the free JSONBin limit. Move long scripts into a separate doc and keep only its link here (Logistics → Script doc link).';
+  } else if(b >= WARN_BYTES){
+    elSize.hidden = false; elSize.className = 'sizebar k-warn';
+    elSize.textContent = 'Library is ' + kb + ' and getting large. Long scripts belong in a separate doc — store the link, not the whole script.';
+  } else { elSize.hidden = true; elSize.textContent = ''; }
+}
+
+/* ----- network ----- */
+async function httpError(res){
+  let detail = '';
+  try{
+    const t = await res.text();
+    try{ const j = JSON.parse(t); detail = j.message || t; }catch(_){ detail = t; }
+  }catch(_){}
+  const e = new Error('HTTP ' + res.status + (res.statusText ? ' ' + res.statusText : '') + (detail ? ' — ' + String(detail).slice(0,160) : ''));
+  e.http = res.status;
+  return e;
+}
+function netFail(e){
+  netState = 'error';
+  netMsg = (e && e.http) ? ('Sync failed · ' + e.message) : ('Offline · ' + ((e && e.message) || 'network error'));
+  refreshStatus();
+}
+function binUrl(bin){ return API + '/' + encodeURIComponent(bin); }
+
+async function pull(force){
+  if(!syncReady()){ refreshStatus(); return; }
+  const now = Date.now();
+  if(!force && now - lastPullAt < PULL_THROTTLE_MS) return;
+  if(pulling) return;
+  pulling = true; lastPullAt = now;
+  netState = 'syncing'; refreshStatus();
+  try{
+    const res = await fetch(binUrl(sync.binId) + '/latest', { headers:{ 'X-Master-Key': sync.key } });
+    if(!res.ok) throw await httpError(res);
+    const j = await res.json();
+    pulledOnce = true;
+    handleRemote(j && j.record);
+    netState = 'idle'; lastSyncAt = Date.now();
+  }catch(e){ netFail(e); }
+  finally{ pulling = false; refreshStatus(); }
+}
+
+function handleRemote(remote){
+  const ok = remote && typeof remote === 'object' && Array.isArray(remote.stories);
+  const rUp = ok ? str(remote.updated) : '';
+  if(!ok){                                   /* bin is empty or foreign */
+    if(data.stories.length) schedPush(0); else syncedStamp = data.updated;
+    bootEmpty = false; return;
+  }
+  /* A fresh device that created stories before its first pull: keep both. */
+  if(bootEmpty && data.stories.length && remote.stories.length){
+    const have = new Set(data.stories.map(function(s){ return s.id; }));
+    remote.stories.forEach(function(s){ if(!have.has(s.id)) data.stories.push(normStory(s)); });
+    bootEmpty = false; touch(); render(); return;
+  }
+  bootEmpty = false;
+  if(rUp > data.updated){
+    if(isEditing()){ deferred = remote; return; }   /* never clobber a field I'm typing in */
+    applyRemote(remote);
+  } else if(rUp < data.updated){
+    schedPush(0);
+  } else { syncedStamp = data.updated; }
+}
+
+function applyRemote(r){
+  deferred = null;
+  data = normalizeData(r);
+  syncedStamp = data.updated;
+  lastSyncAt = Date.now();
+  saveLocal();
+  if(currentId && !data.stories.some(function(s){ return s.id === currentId; })){
+    currentId = null;
+    try{ history.replaceState(null, '', '#/'); }catch(e){}
+  }
+  render();
+}
+
+function flushDeferred(){
+  if(!deferred || isEditing()) return;
+  const r = deferred; deferred = null;
+  if(str(r.updated) > data.updated) applyRemote(r);
+  else { schedPush(0); refreshStatus(); }
+}
+
+async function push(){
+  if(!syncReady()){ refreshStatus(); return; }
+  if(!pulledOnce){ await pull(true); if(!pulledOnce) return; }
+  if(data.updated === syncedStamp) return;
+  if(pushing){ pushAgain = true; return; }
+  pushing = true; netState = 'syncing'; refreshStatus();
+  const snapshot = JSON.stringify(data);
+  const stamp = data.updated;
+  try{
+    const res = await fetch(binUrl(sync.binId), {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': sync.key, 'X-Bin-Versioning':'false' },
+      body: snapshot
+    });
+    if(!res.ok) throw await httpError(res);
+    syncedStamp = stamp; lastSyncAt = Date.now(); netState = 'idle';
+  }catch(e){ netFail(e); }
+  finally{
+    pushing = false; refreshStatus();
+    if(pushAgain){ pushAgain = false; schedPush(); }
+  }
+}
+
+async function testAndSave(){
+  const bin = draftBin.trim(), key = draftKey.trim();
+  if(!bin || !key){ setSyncMsg('Enter both a Bin ID and a Master Key.', 'bad'); return; }
+  sync = { binId:bin, key:key }; saveSyncCfg();
+  setSyncMsg('Testing…', 'dim');
+  try{
+    const res = await fetch(binUrl(bin) + '/latest', { headers:{ 'X-Master-Key': key } });
+    if(!res.ok){ const e = await httpError(res); setSyncMsg('FAILED — ' + e.message, 'bad'); return; }
+    const j = await res.json();
+    const rec = j && j.record;
+    pulledOnce = true; lastPullAt = Date.now();
+    handleRemote(rec);
+    netState = 'idle'; lastSyncAt = Date.now();
+    const n = (rec && Array.isArray(rec.stories)) ? rec.stories.length : 0;
+    setSyncMsg('OK — HTTP ' + res.status + '. ' + (n ? 'Bin holds ' + n + ' stories.' : 'Bin is empty; this device\'s stories will be pushed.'), 'ok');
+    refreshStatus();
+  }catch(e){
+    setSyncMsg('FAILED — network error: ' + ((e && e.message) || 'could not reach JSONBin'), 'bad');
+  }
+}
+function clearSync(){
+  sync = { binId:'', key:'' }; draftBin = ''; draftKey = '';
+  try{ localStorage.removeItem(KEY_SYNC); }catch(e){}
+  pulledOnce = false; netState = 'idle'; syncMsg = 'Keys removed — this device is local only.'; syncMsgKind = 'warn';
+  refreshStatus(); render();
+}
+function setSyncMsg(t, k){
+  syncMsg = t; syncMsgKind = k;
+  const el = document.getElementById('syncMsg');
+  if(el){ el.textContent = t; el.className = 'syncmsg k-' + k; }
+}
+function setIoMsg(t, k){
+  ioMsg = t; ioMsgKind = k;
+  const el = document.getElementById('ioMsg');
+  if(el){ el.textContent = t; el.className = 'syncmsg k-' + k; }
+}
+
+/* ----- typing guard ----- */
+function isEditing(){
+  const a = document.activeElement;
+  if(!a || !app.contains(a)) return false;
+  if(a.tagName === 'TEXTAREA') return !a.readOnly;
+  if(a.tagName === 'INPUT') return ['checkbox','button','submit'].indexOf(a.type) < 0;
+  return a.tagName === 'SELECT';
+}
+
+/* ----- rendering ----- */
+function seg(s, tall){
+  const full = doneCount(s) === STAGES.length;
+  return '<div class="tally' + (tall ? ' tall' : '') + (full ? ' win' : '') + '">' +
+    STAGES.map(function(st){ return '<span class="' + (s.stages[st.id] ? 'done' : '') + '"></span>'; }).join('') + '</div>';
+}
+
+function render(){
+  const y = window.scrollY;
+  const s = cur();
+  if(currentId && !s){ currentId = null; }
+  let d = 0;
+  data.stories.forEach(function(x){ d += doneCount(x); });
+  elGlobal.innerHTML = data.stories.length + ' stories · <b>' + d + '/' + (data.stories.length * STAGES.length) + '</b> stages done';
+  app.style.setProperty('--accent', s ? s.accent : '#EDEBE6');
+  app.innerHTML = s ? viewDetail(s) : viewList();
+  Array.prototype.forEach.call(app.querySelectorAll('textarea:not(.fixed)'), function(t){ autosize(t); hintFor(t); });
+  if(focusTitle){
+    focusTitle = false;
+    const t = app.querySelector('.title-in');
+    if(t){ try{ t.focus(); }catch(e){} }
+  }
+  if(selectExportNext){
+    selectExportNext = false;
+    selectExport();
+  }
+  try{ window.scrollTo(0, y); }catch(e){}
+  refreshStatus();
+}
+
+function autosize(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight + 2, 900) + 'px';
+}
+function hintFor(el){
+  const h = el.nextElementSibling;
+  if(!h || !h.classList.contains('hint')) return;
+  if(el.value.length > LONG_FIELD_CHARS){
+    h.textContent = el.value.length.toLocaleString() + ' characters — long scripts belong in a separate doc. Keep the link in Logistics, not the whole text here.';
+    h.classList.add('show');
+  } else { h.classList.remove('show'); }
+}
+
+function field(g, k, val, ph){
+  return '<textarea class="f" data-g="' + g + '" data-k="' + k + '" rows="3" placeholder="' + esc(ph || '') + '">\n' + esc(val) + '</textarea><div class="hint"></div>';
+}
+
+function viewList(){
+  let h = '';
+  if(panel === 'sync') h += panelSync();
+  if(panel === 'io') h += panelIO();
+
+  h += '<div class="tools"><button class="btn" data-act="new">+ New story</button>' +
+       (data.stories.length > 1 ? '<button class="btn' + (reorderMode ? ' on' : '') + '" data-act="reorder">' + (reorderMode ? 'Done' : 'Priority order') + '</button>' : '') +
+       '</div>';
+
+  if(!data.stories.length){
+    h += '<p class="empty">No stories yet. Every T.A.I. story starts with three things — an Object, a World and an Emotion. Tap + New story to open a blank template.</p>';
+    return h;
+  }
+  if(reorderMode){
+    h += '<p class="empty">Arrows set the order — top of the list is first. Tap Done when finished.</p>';
+    data.stories.forEach(function(s, i){
+      h += '<div class="rrow" style="--accent:' + s.accent + '"><span class="dotc"></span>' +
+        '<span class="rname">' + (esc(s.title) || 'Untitled story') + '</span>' +
+        '<button class="icb" data-act="up" data-id="' + esc(s.id) + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">▲</button>' +
+        '<button class="icb" data-act="down" data-id="' + esc(s.id) + '"' + (i === data.stories.length - 1 ? ' disabled' : '') + ' aria-label="Move down">▼</button></div>';
+    });
+    return h;
+  }
+  data.stories.forEach(function(s, i){
+    const c = doneCount(s), full = c === STAGES.length;
+    const right = s.log.publishDate ? 'Publish ' + esc(s.log.publishDate) : esc(s.log.postStatus);
+    h += '<article class="card' + (full ? ' complete' : '') + '" style="--accent:' + s.accent + '" data-act="open" data-id="' + esc(s.id) + '" tabindex="0" role="button">' +
+      '<span class="rank">' + pad(i + 1) + '</span>' +
+      '<span class="cardbody">' +
+        '<span class="eyebrow">' + (full ? 'Complete' : 'Current · ' + esc(curStage(s))) + '</span>' +
+        '<div class="cardname">' + (esc(s.title) || 'Untitled story') + '</div>' +
+        seg(s) +
+        '<div class="cardfoot"><span><span class="n">' + c + '</span> / ' + STAGES.length + ' stages</span><span class="n">' + right + '</span></div>' +
+      '</span><span class="chev">›</span></article>';
+  });
+  return h;
+}
+
+function viewDetail(s){
+  const c = doneCount(s), full = c === STAGES.length, pct = Math.round(c / STAGES.length * 100);
+  const oweDone = OWE.filter(function(o){ return String(s.owe[o.id] || '').trim(); }).length;
+  const pmDone = PM.filter(function(q){ return String(s.pm[q.id] || '').trim(); }).length;
+  const L = s.log;
+  let h = '<div class="backrow"><button class="back" data-act="back">‹ All stories</button></div>';
+
+  h += '<div class="jobhead' + (full ? ' complete' : '') + '">' +
+    '<div class="eyebrow">' + (full ? 'Complete' : 'Current · ' + esc(curStage(s))) + '</div>' +
+    '<input class="f title-in" data-g="root" data-k="title" value="' + esc(s.title) + '" placeholder="Untitled story" autocomplete="off" autocapitalize="words">' +
+    '<div class="tallywrap">' + seg(s, true) + '</div>' +
+    '<div class="readout"><span class="pct">' + (full ? 'Complete' : pct + '%') + '</span><span>' + c + ' of ' + STAGES.length + ' stages</span></div>' +
+    '<div class="colorrow"><span class="eyebrow">Colour</span>' +
+      PALETTE.map(function(p){ return '<button class="pdot' + (p.toLowerCase() === s.accent.toLowerCase() ? ' on' : '') + '" style="--c:' + p + '" data-act="accent" data-c="' + p + '" aria-label="Colour ' + p + '"></button>'; }).join('') +
+      '<span class="swatch"><i></i><input type="color" data-g="root" data-k="accent" value="' + esc(s.accent) + '" aria-label="Custom colour"></span>' +
+    '</div></div>';
+
+  /* Object / World / Emotion */
+  h += '<section class="phase"><div class="phasehead"><h2>Object · World · Emotion</h2><span class="tick' + (oweDone === 3 ? ' win' : '') + '">' + oweDone + '/3</span></div>';
+  OWE.forEach(function(o){
+    h += '<div class="oweblock"><h3>' + o.label + '</h3><ul class="prompts">' +
+      o.prompts.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>' +
+      field('owe', o.id, s.owe[o.id], 'Your answer…') + '</div>';
+  });
+  h += '</section>';
+
+  /* Stages */
+  h += '<section class="phase"><div class="phasehead"><h2>Production stages</h2><span class="tick' + (full ? ' win' : '') + '">' + c + '/' + STAGES.length + '</span></div>';
+  STAGES.forEach(function(st, i){
+    h += '<div class="step' + (s.stages[st.id] ? ' done' : '') + '" data-act="stage" data-sid="' + st.id + '" tabindex="0" role="button" aria-pressed="' + (s.stages[st.id] ? 'true' : 'false') + '">' +
+      '<span class="box">✓</span><span class="idx">' + pad(i + 1) + '</span><span class="steptitle">' + esc(st.label) + '</span></div>';
+  });
+  h += '</section>';
+
+  /* Logistics */
+  const opts = POST_STATUS.indexOf(L.postStatus) >= 0 ? POST_STATUS : POST_STATUS.concat([L.postStatus]);
+  const txt = function(label, k, type, ph, extra){
+    return '<label class="lbl">' + label + '</label><input class="f" data-g="log" data-k="' + k + '" type="' + type + '" value="' + esc(L[k]) + '" placeholder="' + esc(ph || '') + '" autocomplete="off" autocapitalize="off" ' + (extra || '') + '>';
+  };
+  h += '<section class="phase"><div class="phasehead"><h2>Logistics</h2></div>' +
+    txt('Shoot dates', 'shootDates', 'text', 'e.g. Oct 20–24, Nov 2') +
+    '<div class="g2"><div>' + txt('Target runtime', 'runtime', 'text', 'e.g. 1:30') + '</div><div>' + txt('Frame rate', 'fps', 'text', 'e.g. 12', 'list="fpsList" inputmode="decimal"') + '</div></div>' +
+    '<div class="g2"><div><label class="lbl">Post status</label><select class="f" data-g="log" data-k="postStatus">' +
+      opts.map(function(o){ return '<option' + (o === L.postStatus ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></div>' +
+    '<div>' + txt('Publish date', 'publishDate', 'date', '') + '</div></div>' +
+    txt('Music file link', 'music', 'url', 'https://…') +
+    txt('Script / long-writing doc link', 'scriptLink', 'url', 'https://… (keep full scripts here, not in this app)') +
+    '</section>';
+
+  /* Post-mortem */
+  h += '<section class="phase"><div class="phasehead"><h2>Post-mortem</h2><span class="tick' + (pmDone === PM.length ? ' win' : '') + '">' + pmDone + '/' + PM.length + '</span></div>' +
+    '<p class="phasenote">Answer these after release.</p>';
+  PM.forEach(function(q){
+    h += '<label class="lbl">' + esc(q.q) + '</label>' + field('pm', q.id, s.pm[q.id], 'Your answer…');
+  });
+  h += '</section>';
+
+  /* Notes + delete */
+  h += '<section class="phase"><div class="phasehead"><h2>Notes</h2></div>' + field('root', 'notes', s.notes, 'References, loose ideas, anything worth keeping…') + '</section>';
+  h += '<div class="tools"><button class="btn danger" data-act="del">Delete story</button></div>';
+  return h;
+}
+
+function panelSync(){
+  return '<div class="sync"><h3>Sync setup</h3>' +
+    '<p>Paste the Bin ID and Master Key from a JSONBin.io bin made just for the story library. Both are kept only in this browser. Enter the same two values on every device. Leave them out to stay local-only.</p>' +
+    '<label class="lbl">Bin ID</label><input class="f" data-sync="bin" value="' + esc(draftBin) + '" placeholder="Bin ID" autocomplete="off" autocapitalize="off" spellcheck="false">' +
+    '<label class="lbl">Master Key</label><input class="f" type="password" data-sync="key" value="' + esc(draftKey) + '" placeholder="Master Key" autocomplete="off" autocapitalize="off" spellcheck="false">' +
+    '<div class="row"><button class="btn on" data-act="savetest">Save and test</button><button class="btn danger" data-act="clearsync">Remove keys</button><button class="btn" data-act="closepanel">Close</button></div>' +
+    '<div id="syncMsg" class="syncmsg k-' + syncMsgKind + '">' + esc(syncMsg) + '</div></div>';
+}
+
+function panelIO(){
+  return '<div class="sync"><h3>Backup / import</h3>' +
+    '<p>Export puts the whole library on screen as plain text. Select it and copy it by hand to back it up. Paste text into Import to add stories or change existing ones: blocks whose id matches are updated, fields you leave out stay as they are, and blocks without an id are added at the top.</p>' +
+    '<label class="lbl">Backup text</label>' +
+    '<textarea class="f fixed" readonly data-exp="1" rows="9">\n' + esc(exportText) + '</textarea>' +
+    '<div class="row"><button class="btn" data-act="selectall">Select all</button><button class="btn" data-act="refreshexp">Refresh</button></div>' +
+    '<label class="lbl">Import — paste text here</label>' +
+    '<textarea class="f fixed" data-imp="1" rows="9" placeholder="=== STORY ===&#10;title: My new story&#10;stages: idea, owe&#10;--- object&#10;A rusted key">\n' + esc(draftImport) + '</textarea>' +
+    '<div class="row"><button class="btn on" data-act="import">Import (merge)</button><button class="btn" data-act="closepanel">Close</button></div>' +
+    '<div id="ioMsg" class="syncmsg k-' + ioMsgKind + '">' + esc(ioMsg) + '</div></div>';
+}
+
+/* ----- text export / import ----- */
+function oneLine(v){ return String(v == null ? '' : v).replace(/\s*\n\s*/g, ' ').trim(); }
+function secOut(L, name, val){
+  L.push('--- ' + name);
+  String(val || '').replace(/\r\n?/g, '\n').split('\n').forEach(function(l){
+    L.push(/^\\*(---|===)/.test(l) ? '\\' + l : l);
+  });
+  L.push('');
+}
+function toText(){
+  const L = [];
+  L.push('# T.A.I. STORY LIBRARY — backup');
+  L.push('# format v1 · exported ' + nowISO());
+  L.push('# Stage ids: ' + STAGES.map(function(s){ return s.id; }).join(', '));
+  L.push('# Post status: ' + POST_STATUS.join(' | '));
+  L.push('# Add a story with "=== STORY ===" and no id. Fields you leave out are left unchanged on import.');
+  L.push('# Sections start with "--- name". A line inside a section that begins with --- or === is escaped with a leading backslash.');
+  L.push('');
+  data.stories.forEach(function(s){
+    L.push('=== STORY: ' + s.id + ' ===');
+    L.push('title: ' + oneLine(s.title));
+    L.push('accent: ' + s.accent);
+    L.push('stages: ' + STAGES.filter(function(st){ return s.stages[st.id]; }).map(function(st){ return st.id; }).join(', '));
+    LOG_KEYS.forEach(function(lk){ L.push(lk.t + ': ' + oneLine(s.log[lk.k])); });
+    L.push('');
+    OWE.forEach(function(o){ secOut(L, o.id, s.owe[o.id]); });
+    secOut(L, 'notes', s.notes);
+    PM.forEach(function(q){ secOut(L, 'pm.' + q.id, s.pm[q.id]); });
+  });
+  return L.join('\n');
+}
+
+function parseText(txt){
+  const lines = String(txt).replace(/\r\n?/g, '\n').split('\n');
+  const blocks = []; const errors = [];
+  let b = null, sec = null, m;
+  lines.forEach(function(raw){
+    if((m = /^===\s*STORY(?:\s*:\s*(\S*))?\s*===\s*$/i.exec(raw))){
+      b = { id:(m[1] || '').trim(), f:{}, secs:{} }; blocks.push(b); sec = null; return;
+    }
+    if(!b) return;
+    if((m = /^---\s*(\S+)\s*$/.exec(raw))){ sec = m[1].toLowerCase(); b.secs[sec] = []; return; }
+    if(sec){ b.secs[sec].push(/^\\+(---|===)/.test(raw) ? raw.slice(1) : raw); return; }
+    if(/^\s*(#.*)?$/.test(raw)) return;
+    if((m = /^([A-Za-z_]+)\s*:\s?(.*)$/.exec(raw))){ b.f[m[1].toLowerCase()] = m[2].trim(); }
+    else errors.push('Unrecognised line: ' + raw.slice(0, 40));
+  });
+  blocks.forEach(function(x){
+    Object.keys(x.secs).forEach(function(k){ x.secs[k] = x.secs[k].join('\n').replace(/^\n+|\n+$/g, ''); });
+  });
+  return { blocks:blocks, errors:errors };
+}
+
+function applyImport(blocks){
+  const warns = []; const fresh = []; let added = 0, updated = 0;
+  blocks.forEach(function(b, bi){
+    const tag = 'Block ' + (bi + 1);
+    const wantId = (b.id && b.id.toLowerCase() !== 'new') ? b.id : '';
+    let s = wantId ? data.stories.find(function(x){ return x.id === wantId; }) : null;
+    const isNew = !s;
+    if(isNew) s = normStory({ id: wantId || newId(), accent: PALETTE[(data.stories.length + fresh.length) % PALETTE.length], created: nowISO() });
+    const f = b.f;
+    if('title' in f) s.title = f.title;
+    if('accent' in f){ if(isHex(f.accent)) s.accent = f.accent; else warns.push(tag + ': accent should look like #58BFD1'); }
+    if('stages' in f){
+      const want = f.stages.split(',').map(norm).filter(Boolean);
+      STAGES.forEach(function(st){ s.stages[st.id] = want.indexOf(norm(st.id)) >= 0 || want.indexOf(norm(st.label)) >= 0; });
+      want.forEach(function(w){
+        if(!STAGES.some(function(st){ return norm(st.id) === w || norm(st.label) === w; })) warns.push(tag + ': unknown stage "' + w + '"');
+      });
+    }
+    LOG_KEYS.forEach(function(lk){
+      if(!(lk.t in f)) return;
+      const v = f[lk.t];
+      if(lk.k === 'postStatus'){
+        const hit = POST_STATUS.find(function(o){ return o.toLowerCase() === v.toLowerCase(); });
+        if(hit) s.log.postStatus = hit; else warns.push(tag + ': unknown post status "' + v + '"');
+      } else if(lk.k === 'publishDate'){
+        if(v === '' || /^\d{4}-\d{2}-\d{2}$/.test(v)) s.log.publishDate = v; else warns.push(tag + ': publish_date must be YYYY-MM-DD');
+      } else { s.log[lk.k] = v; }
+    });
+    Object.keys(b.secs).forEach(function(name){
+      const v = b.secs[name];
+      if(OWE.some(function(o){ return o.id === name; })) s.owe[name] = v;
+      else if(name === 'notes') s.notes = v;
+      else if(name.indexOf('pm.') === 0 && PM.some(function(q){ return q.id === name.slice(3); })) s.pm[name.slice(3)] = v;
+      else warns.push(tag + ': unknown section "' + name + '"');
+    });
+    if(isNew){ fresh.push(s); added++; } else updated++;
+  });
+  data.stories = fresh.concat(data.stories);
+  return { added:added, updated:updated, warns:warns };
+}
+
+function doImport(btn){
+  if(btn.dataset.armed !== '1'){
+    const p = parseText(draftImport);
+    if(!p.blocks.length){ setIoMsg('Nothing to import — no "=== STORY ===" blocks found.', 'warn'); return; }
+    const nNew = p.blocks.filter(function(b){
+      const id = (b.id && b.id.toLowerCase() !== 'new') ? b.id : '';
+      return !id || !data.stories.some(function(s){ return s.id === id; });
+    }).length;
+    armBtn(btn, 'Apply ' + nNew + ' new · ' + (p.blocks.length - nNew) + ' update — tap again');
+    return;
+  }
+  disarm(btn);
+  const p = parseText(draftImport);
+  const r = applyImport(p.blocks);
+  touch();
+  exportText = toText();
+  draftImport = '';
+  ioMsg = 'Done: ' + r.added + ' added, ' + r.updated + ' updated.' + (r.warns.length ? ' Notes: ' + r.warns.join('; ') : '');
+  ioMsgKind = r.warns.length ? 'warn' : 'ok';
+  render();
+}
+
+function selectExport(){
+  const ta = app.querySelector('textarea[data-exp]');
+  if(!ta) return;
+  try{ ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length); }catch(e){}
+  setIoMsg('Backup text is selected — copy it by hand.', 'ok');
+}
+
+/* ----- two-tap arm-then-confirm (replaces confirm()) ----- */
+function armBtn(btn, armedLabel){
+  if(btn.dataset.armed === '1') return true;
+  btn.dataset.armed = '1'; btn.dataset.label = btn.textContent;
+  btn.textContent = armedLabel; btn.classList.add('armed');
+  clearTimeout(btn._t); btn._t = setTimeout(function(){ disarm(btn); }, 4000);
+  return false;
+}
+function disarm(btn){
+  if(btn.dataset.armed === '1'){
+    btn.dataset.armed = '0'; btn.textContent = btn.dataset.label || btn.textContent; btn.classList.remove('armed');
+  }
+}
+
+/* ----- navigation + actions ----- */
+function readHash(){
+  const m = /^#\/s\/(.+)$/.exec(location.hash);
+  currentId = m ? decodeURIComponent(m[1]) : null;
+}
+function go(id){ location.hash = id ? '#/s/' + encodeURIComponent(id) : '#/'; }
+
+function newStory(){
+  const s = normStory({ id:newId(), title:'', accent:PALETTE[data.stories.length % PALETTE.length], created:nowISO() });
+  data.stories.unshift(s);
+  touch(); focusTitle = true; go(s.id);
+}
+function moveStory(id, dir){
+  const i = data.stories.findIndex(function(s){ return s.id === id; });
+  const j = i + dir;
+  if(i < 0 || j < 0 || j >= data.stories.length) return;
+  const x = data.stories.splice(i, 1)[0]; data.stories.splice(j, 0, x);
+  touch(); render();
+}
+function toggleStage(sid){
+  const s = cur(); if(!s) return;
+  s.stages[sid] = !s.stages[sid];
+  touch(); render();
+}
+function setAccent(c){
+  const s = cur(); if(!s) return;
+  s.accent = c; touch(); render();
+}
+function deleteStory(){
+  const id = currentId;
+  data.stories = data.stories.filter(function(s){ return s.id !== id; });
+  touch(); go(null);
+}
+function togglePanel(p){
+  panel = (panel === p) ? '' : p;
+  if(panel === 'sync'){ draftBin = sync.binId; draftKey = sync.key; }
+  if(panel === 'io'){ exportText = toText(); selectExportNext = true; }
+  if(currentId){ go(null); return; }
+  render();
+}
+
+function onField(el){
+  const g = el.dataset.g, k = el.dataset.k;
+  const s = cur(); if(!s || !g) return;
+  if(g === 'root'){
+    s[k] = el.value;
+    if(k === 'accent' && isHex(el.value)) app.style.setProperty('--accent', el.value);
+  } else { s[g][k] = el.value; }
+  if(el.tagName === 'TEXTAREA'){ autosize(el); hintFor(el); }
+  touch();
+}
+
+/* ----- events (delegated) ----- */
+app.addEventListener('click', function(e){
+  const t = e.target.closest('[data-act]');
+  if(!t || !app.contains(t)) return;
+  const act = t.dataset.act, id = t.dataset.id;
+  switch(act){
+    case 'new': newStory(); break;
+    case 'open': go(id); break;
+    case 'back': go(null); break;
+    case 'reorder': reorderMode = !reorderMode; render(); break;
+    case 'up': moveStory(id, -1); break;
+    case 'down': moveStory(id, 1); break;
+    case 'stage': toggleStage(t.dataset.sid); break;
+    case 'accent': setAccent(t.dataset.c); break;
+    case 'del': if(armBtn(t, 'Tap again to delete')) deleteStory(); break;
+    case 'savetest': testAndSave(); break;
+    case 'clearsync': if(armBtn(t, 'Tap again to remove keys')) clearSync(); break;
+    case 'closepanel': panel = ''; render(); break;
+    case 'selectall': selectExport(); break;
+    case 'refreshexp': exportText = toText(); selectExportNext = true; render(); break;
+    case 'import': doImport(t); break;
+  }
+});
+app.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target;
+  if(t.matches && t.matches('article[data-act], .step[data-act]')){ e.preventDefault(); t.click(); }
+});
+function onInput(e){
+  const el = e.target;
+  if(el.dataset.sync){ if(el.dataset.sync === 'bin') draftBin = el.value; else draftKey = el.value; return; }
+  if(el.dataset.imp){ draftImport = el.value; return; }
+  if(el.dataset.g) onField(el);
+}
+app.addEventListener('input', onInput);
+app.addEventListener('change', onInput);
+app.addEventListener('focusout', function(){
+  saveLocal();                       /* save on blur, never only on a button */
+  setTimeout(flushDeferred, 60);
+});
+
+function footerGo(p){
+  panel = p; reorderMode = false;
+  if(p === 'io'){ exportText = toText(); selectExportNext = true; }
+  if(p === 'sync'){ draftBin = sync.binId; draftKey = sync.key; }
+  if(currentId){ go(null); } else { render(); }
+  try{ window.scrollTo(0, 0); }catch(e){}
+}
+
+function initIcon(){
+  try{
+    const c = document.createElement('canvas'); c.width = c.height = 180;
+    const x = c.getContext && c.getContext('2d'); if(!x) return;
+    x.fillStyle = '#0B0C0E'; x.fillRect(0, 0, 180, 180);
+    x.strokeStyle = '#EDEBE6'; x.lineWidth = 5; x.strokeRect(18, 18, 144, 144);
+    x.fillStyle = '#EDEBE6'; x.font = 'bold 56px "Arial Narrow", Arial, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('T.A.I.', 90, 92);
+    const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = c.toDataURL('image/png');
+    document.head.appendChild(l);
+  }catch(e){}
+}
+
+function showFatal(err){
+  elFatal.style.display = 'block';
+  elFatal.textContent = 'Something broke while loading:\n' + ((err && (err.stack || err.message)) || err);
+}
+
+/* ---------- 4. BOOT (keep this last) ---------- */
+window.addEventListener('error', function(e){ showFatal(e.error || e.message); });
+window.addEventListener('unhandledrejection', function(e){ showFatal(e.reason); });
+try{
+  bootEmpty = !data.updated && data.stories.length === 0;
+  draftBin = sync.binId; draftKey = sync.key;
+  document.getElementById('verNum').textContent = TEMPLATE_VERSION;
+  readHash();
+  render();                                   /* first paint comes from the local cache */
+  window.addEventListener('hashchange', function(){ readHash(); render(); try{ window.scrollTo(0, 0); }catch(e){} });
+  window.addEventListener('focus', function(){ pull(false); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) saveLocal(); else pull(false); });
+  window.addEventListener('pagehide', saveLocal);
+  window.addEventListener('online', function(){ pull(true); });
+  document.getElementById('refreshBtn').onclick = function(){ pull(true); };
+  document.getElementById('exportBtn').onclick = function(){ footerGo('io'); };
+  document.getElementById('importBtn').onclick = function(){ footerGo('io'); const t = app.querySelector('textarea[data-imp]'); if(t){ try{ t.focus(); }catch(e){} } };
+  document.getElementById('cfgBtn').onclick = function(){ footerGo('sync'); };
+  initIcon();
+  pull(true);                                 /* async — never blocks first paint */
+}catch(err){ showFatal(err); }
+</script>
+</body>
+</html>
